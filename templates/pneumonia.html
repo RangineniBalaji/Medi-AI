@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .container {
+            display: flex;
+            border: 1px solid #ccc;
+        }
+
+        .input-section {
+            flex: 3;
+            padding: 20px;
+            background-color: #f8f8f8;
+            border-right: 1px solid #ccc;
+        }
+
+        .info-section {
+            flex: 1;
+            padding: 10px;
+            background-color: #f0f0f0;
+        }
+
+        .input-section h2 {
+            color: #0078d4;
+        }
+
+        /* Style the button */
+        .input-section button {
+            background-color: #0078d4;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        /* Add a hover effect */
+        .input-section button:hover {
+            background-color: #0054a4;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Medi AI - Your Medical AI Assistant</h1>
+    </header>
+    <main>
+        <section class="container">
+            <div class="input-section">
+                <h2>Pneumonia Detection</h2>
+                <p>Upload your chest X-ray image to detect pneumonia using our AI-powered image analysis tool.</p>
+
+                <form action="{{url_for('pneumoniaDetection')}}" method="post" enctype="multipart/form-data">
+                    <input type="file" name="image" accept=".jpg, .jpeg, .png" required>
+                    <!-- Style the button here -->
+                    <button type="submit">Detect Pneumonia</button>
+                </form>
+                
+                <div id="prediction">
+                    <h3>Prediction</h3>
+                    <p id="prediction-result">{{data}}</p>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>How It Works</h3>
+                <p>Our system processes chest X-ray images and uses advanced machine learning techniques to identify signs of pneumonia.</p>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

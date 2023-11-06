@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Medical Reminders</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    /* Add your custom CSS styling here */
+    body {
+      font-family: Arial, sans-serif;
+    }
+    #reminder-container {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f0f0f0;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    }
+    h1 {
+      text-align: center;
+    }
+    label {
+      font-weight: bold;
+    }
+    #name-input, #time-input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    #add-button {
+      width: 100%;
+      padding: 10px;
+      background: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #reminders-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    #reminders-table th, #reminders-table td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+    <header>
+        <h1>Medi AI - Your Medical AI Assistant</h1>
+    </header>
+  <div id="reminder-container">
+    <h1>Medical Reminders</h1>
+    <label for="name-input">Tablet Name:</label>
+    <input type="text" id="name-input" placeholder="Enter tablet name">
+    <label for="time-input">Reminder Time:</label>
+    <input type="time" id="time-input">
+    <button id="add-button">Add Reminder</button>
+    <table id="reminders-table">
+      <thead>
+        <tr>
+          <th>Tablet Name</th>
+          <th>Reminder Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Reminders will be added here dynamically -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+document.getElementById('add-button').addEventListener('click', function() {
+  const name = document.getElementById('name-input').value;
+  const time = document.getElementById('time-input').value;
+
+  if (name && time) {
+    const table = document.getElementById('reminders-table').getElementsByTagName('tbody')[0];
+    const row = table.insertRow(table.rows.length);
+
+    const cell1 = row.insertCell(0);
+    const cell2 = row.insertCell(1);
+
+    cell1.innerHTML = name;
+    cell2.innerHTML = time;
+
+    // Split the time input into hours and minutes
+    const [hours, minutes] = time.split(':');
+    
+    // Get the current date and time
+    const now = new Date();
+
+    // Set the notification time by combining the current date with the input time
+    const notificationTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+
+    // Calculate the delay in milliseconds until the notification time
+    const delay = notificationTime - now;
+
+    if (delay > 0) {
+      // Schedule a notification to appear at the specified time
+      setTimeout(function() {
+        if (Notification.permission === 'granted') {
+          const notification = new Notification('Reminder', {
+            body: `Time to take ${name}!`,
+          });
+        } else if (Notification.permission !== 'denied') {
+          Notification.requestPermission().then(function(permission) {
+            if (permission === 'granted') {
+              const notification = new Notification('Reminder', {
+                body: `Time to take ${name}!`,
+              });
+            }
+          });
+        }
+      }, delay);
+    }
+
+    // Clear input fields after adding the reminder
+    document.getElementById('name-input').value = '';
+    document.getElementById('time-input').value = '';
+  }
+});
+
+  </script>
+</body>
+</html>
