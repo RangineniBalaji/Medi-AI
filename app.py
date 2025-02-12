@@ -9,8 +9,8 @@ import numpy as np
 import json
 import requests
 
-bt_model = load_model('braintumor.h5')
-pneumonia_model = load_model('pneumonia_detection_model.h5')
+# bt_model = load_model('braintumor.h5')
+# pneumonia_model = load_model('pneumonia_detection_model.h5')
 
 app = Flask(__name__)
 
