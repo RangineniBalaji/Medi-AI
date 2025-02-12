@@ -8,9 +8,10 @@ import numpy as np
 
 import json
 import requests
+import cv2
 
-# bt_model = load_model('braintumor.h5')
-# pneumonia_model = load_model('pneumonia_detection_model.h5')
+# bt_model = load_model('models/trained.h5')
+pneumonia_model = load_model('models/trained.h5')
 
 app = Flask(__name__)
 
@@ -39,9 +40,11 @@ def medical_reminder():
 def generate_response(text):
     headers = {"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZTdmYjAxNDctNWQ2OC00MTVlLTg1OTMtNzZhYzU4ZGQxYjJlIiwidHlwZSI6ImFwaV90b2tlbiJ9.w4BYXRL_aa_PlhAUExp7hmdwsNL23Sj3E2xVWC1oxl0"}
     url = "https://api.edenai.run/v2/text/generation"
+    
+    prompt = f"You are a medical chatbot. If the user's question is related to medical and greetings and some normal things, provide a detailed answer. If the question is not related to medical topics or greetings, respond with 'I'm a medical chatbot. Please ask me medical-related questions. '.\n\nUser: {text}\nChatbot:"
     payload = {
         "providers": "openai,cohere",
-        "text": text,
+        "text": prompt,
         "temperature": 0.2,
         "max_tokens": 1000
     }
@@ -64,34 +67,37 @@ def get_response():
 
 @app.route('/pneumonia.html', methods=['post'])
 def pneumoniaDetection():
-    img_size = (224, 224)
     img_file = request.files['image']
+    img_size = (300, 300)
     img = load_img(BytesIO(img_file.read()), target_size=img_size)
     img_arr = img_to_array(img) / 255.
     img_arr = np.expand_dims(img_arr, axis=0)
-    pred = pneumonia_model.predict(img_arr)
-    pred_class = 'Pneumonia' if pred > 0.5 else 'Normal'
-    if pred_class == "Pneumonia":
-        inf = "You are diagnosed with Pneumonia!"
+ 
+    img = img_arr.reshape(1,300,300,3)
+    pred = pneumonia_model.predict(img)
+    
+    if pred > 0.5:
+        result = "<p style='color:red'>You are diagnosed with Pneumonia. Please consult Doctor Immediately.</p>"
     else:
-        inf = "Your condition is Normal!"
-    return render_template('pneumonia.html', data=inf)
+        result = "<p style='color:green'>Your condition is Normal!</p>"
 
-@app.route('/brain_tumor.html', methods=['POST'])
-def brain_tumor():
-    img_size = (224, 224)
-    img_file = request.files['image']
-    img = load_img(BytesIO(img_file.read()), target_size=img_size)
-    img_arr = img_to_array(img) / 255.
-    img_arr = np.expand_dims(img_arr, axis=0)
-    pred = bt_model.predict(img_arr)
-    pred_class = 'bt' if pred > 0.5 else 'Normal'
-    pred_c=''
-    if pred < 0.5:
-        pred_c = 'You are diagnosed with brain tumor'
-    else:
-        pred_c = 'your condition is normal'
-    return render_template("brain_tumor.html", data=pred_c)
+    return render_template('pneumonia.html', data=result)
+
+# @app.route('/brain_tumor.html', methods=['POST'])
+# def brain_tumor():
+#     img_size = (224, 224)
+#     img_file = request.files['image']
+#     img = load_img(BytesIO(img_file.read()), target_size=img_size)
+#     img_arr = img_to_array(img) / 255.
+#     img_arr = np.expand_dims(img_arr, axis=0)
+#     pred = bt_model.predict(img_arr)
+#     pred_class = 'bt' if pred > 0.5 else 'Normal'
+#     pred_c=''
+#     if pred < 0.5:
+#         pred_c = 'You are diagnosed with brain tumor'
+#     else:
+#         pred_c = 'your condition is normal'
+#     return render_template("brain_tumor.html", data=pred_c)
 
 if __name__ == '__main__':
     app.run(debug=True)
